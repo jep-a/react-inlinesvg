@@ -83,6 +83,7 @@ export default class InlineSVG extends React.PureComponent {
   componentDidUpdate(prevProps) {
     if (prevProps.src !== this.props.src) {
       if (this.props.src) {
+        this.cleanupCallback(prevProps.src);
         this.startLoad();
       }
       else {
@@ -93,6 +94,15 @@ export default class InlineSVG extends React.PureComponent {
 
   componentWillUnmount() {
     this.isActive = false;
+    this.cleanupCallback();
+  }
+
+  cleanupCallback(prevSrc) {
+    if (this.props.cacheGetRequests) {
+      const callbacks = getRequestsByUrl[prevSrc || this.props.src];
+
+      callbacks.splice(callbacks.indexOf(this.handleLoad), 1);
+    }
   }
 
   getFile(callback) {
